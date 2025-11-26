@@ -1,5 +1,5 @@
 blueprint:
-  name: Dynamic EV Charging Automation v2.0
+  name: Dynamic EV Charging Automation v2.0b
   description: >
     **v2.0 - Added start/stop control and fixed power calculation
     - Added charger toggle control for start/stop
@@ -192,6 +192,7 @@ condition:
         entity_id: !input sensor_charging
         state: 
           - 'charging'
+          - 'Charging'
           - 'charged'
           - 'plugged_in'
         
@@ -208,7 +209,7 @@ action:
       total_consumption: "{{ states(sensor_house_power_entity) | float(0) }}"
       charger_consumption: |-
         {% set state = states(sensor_charging_entity) %}
-        {% if state in ['charging', 'plugged_in', 'waiting_for_authorization', 'waiting'] %}
+        {% if state in ['charging', 'Charging','plugged_in', 'waiting_for_authorization', 'waiting'] %}
           {{ charging_current_value * voltage }}
         {% else %}
           0
