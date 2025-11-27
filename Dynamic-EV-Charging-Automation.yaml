@@ -1,6 +1,9 @@
 blueprint:
-  name: Dynamic EV Charging Automation v2.0
+  name: Dynamic EV Charging Automation v2.1
   description: >
+    **v2.1 - Added case-insensitive charging status support
+    - Added support for "Charging" (capital C) status from ESPhome Tesla BLE
+    - Improved status detection to support multiple case variations  
     **v2.0 - Added start/stop control and fixed power calculation
     - Added charger toggle control for start/stop
     - Fixed power calculation formula
@@ -194,6 +197,8 @@ condition:
           - 'charging'
           - 'charged'
           - 'plugged_in'
+          - 'Charging'
+          - 'CHARGING'          
         
 action:
   - variables:
@@ -207,7 +212,7 @@ action:
       grid_power: "{{ states(sensor_house_power_entity) | float(0) }}"
       total_consumption: "{{ states(sensor_house_power_entity) | float(0) }}"
       charger_consumption: |-
-        {% set state = states(sensor_charging_entity) %}
+        {% set state = states(sensor_charging_entity) | lower %}
         {% if state in ['charging', 'plugged_in', 'waiting_for_authorization', 'waiting'] %}
           {{ charging_current_value * voltage }}
         {% else %}
