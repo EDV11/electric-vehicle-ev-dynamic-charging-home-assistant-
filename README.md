@@ -17,12 +17,22 @@ It also supports **different power limits for day and night** to optimize chargi
 </div>
 
 ---
+## 🆕 **Latest Update: Version 2.1 Released!**
+### ⭐ **What's New in v2.1**
+#### **Case-Insensitive Charging Status Support**
+- **ESPhome Tesla BLE compatibility**: Now supports "Charging" (capital C) status from ESPhome Tesla BLE client
+- **Multiple case format support**: Accepts `charging`, `Charging`, `CHARGING`, and other variations
+- **Improved status detection**: Uses `| lower` filter for robust state comparison
+- **Better integration compatibility**: Works seamlessly with different Home Assistant integrations and custom components
 
-## 🆕 **Latest Update: Version 2.0 Released!**
+**No configuration changes required** - existing automations will automatically benefit from improved status detection.
 
-### ⭐ **What's New in v2.0**
+---
 
-**Major improvements** that make the automation more reliable and robust:
+### 📋 **Previous Updates**
+
+<details>
+<summary><b>Version 2.0 - Smart Start/Stop Control</b></summary>
 
 #### **Smart Start/Stop Control**
 - **Automatic charger control**: Instead of trying to set charging current to 0A (which many chargers can't handle), the automation now properly stops and starts charging
@@ -39,11 +49,10 @@ It also supports **different power limits for day and night** to optimize chargi
 - **Improved reliability** during power fluctuations
 - **Better error handling** for edge cases
 
-### 🔄 **Important for Existing Users**
-**You MUST recreate your automation** as new configuration options have been added. The new version requires a `select` entity to control charger start/stop functionality.
+**Note for v2.0 users**: You must recreate your automation as new configuration options were added.
+</details>
 
 ---
-
 ## 📥 Installation
 
 This blueprint can be installed in two ways:
