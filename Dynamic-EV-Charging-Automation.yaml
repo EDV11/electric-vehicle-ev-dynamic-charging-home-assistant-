@@ -1,6 +1,7 @@
 blueprint:
-  name: Dynamic EV Charging Automation v2.1
+  name: Dynamic EV Charging Automation v2.2
   description: >
+    **v2.2 - Added option to use only solar production excess
     **v2.1 - Added case-insensitive charging status support
     - Added support for "Charging" (capital C) status from ESPhome Tesla BLE
     - Improved status detection to support multiple case variations  
@@ -83,6 +84,23 @@ blueprint:
         entity:
           domain: sensor
           device_class: power
+    solar_charging_mode:
+      name: Solar Charging Mode
+      description: >
+        Select the boolean entity that enables solar charging mode.
+        
+        This entity should support mode "on" and mode "off".
+
+        In this case it only charges form the excess of your solar production.
+        
+        Your home energy meter should be able to detect if you are using energy from the grid or putting it. Positive values means that you are getting energy from the grid and negative values means that you are putting energy on the grid.
+      
+        Be careful because when this is enabled Maximum Grid Power Day will be disabled and only will use the excess.
+      default: input_boolean.enable_solar_charge
+      selector:
+        entity:
+          domain: input_boolean
+
     max_grid_power_day:
       name: Maximum Grid Power during the day (W)
       description: The maximum contracted power (in watts) available for your home during daytime hours. This value determines the upper power limit when calculating the available energy for charging the electric vehicle (EV). Set this to **0** if you only want to allow charging during nighttime hours.
@@ -204,10 +222,12 @@ action:
   - variables:
       voltage: !input voltage
       max_amps: !input max_amps
-      min_amps: !input min_amps       
+      min_amps: !input min_amps
       sensor_house_power_entity: !input sensor_house_power
       charging_current_entity: !input charging_current
       sensor_charging_entity: !input sensor_charging
+      solar_charging_entity: !input solar_charging_mode
+      solar_charging_mode: "{{ states(solar_charging_entity)}}"
       charging_current_value: "{{ states(charging_current_entity) | float(0) }}"
       grid_power: "{{ states(sensor_house_power_entity) | float(0) }}"
       total_consumption: "{{ states(sensor_house_power_entity) | float(0) }}"
@@ -227,7 +247,15 @@ action:
       is_day_time: "{{ current_day in day_time_days and day_time_start <= now().hour < day_time_end }}"  
       actual_free_power: |-
         {% if is_day_time %}
-          {{ [0, max_grid_power_day - total_consumption + charger_consumption] | max }}
+          {% if solar_charging_mode == 'on' %}
+            {% if total_consumption < 0 %}
+              {{ (total_consumption|float - charger_consumption|float) | abs }}
+            {% else %}
+              {{ 0 }}
+            {% endif %}  
+          {% else %}
+            {{ [0, max_grid_power_day - total_consumption + charger_consumption] | max }}
+          {% endif %}  
         {% else %}
           {{ [0, max_grid_power_night - total_consumption + charger_consumption] | max }}
         {% endif %}        
