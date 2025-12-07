@@ -106,6 +106,7 @@ The following parameters need to be configured:
 - **A device tracker** (preferably the car) to ensure that the automation runs only when the EV is at home.
 - **A charging status sensor** to ensure changes are only made when the EV is actively charging.
 - **Total power consumption sensor** (measured in watts).
+- **A binary sensor to determine if solar charge is enabled.
 
 ### **Power Management**
 - **Maximum Grid Power (Day)** – Set to **0** if you only want to charge at night.
@@ -146,6 +147,14 @@ Once power consumption drops, the EV will **resume charging at the maximum allow
 ### **Day & Night Power Limits**
 Many electricity contracts offer **cheaper power at night**, along with **higher power limits**.  
 This blueprint allows setting **different power limits for day and night**, ensuring that charging is optimized based on your tariff structure.
+
+### **Solar chargigg mode**
+In this case only charges form the excess of your solar production.
+Your home energy meter should be able to detect if you are using energy from the grid or putting it. Positive values means that you are getting energy from the grid and negative values means that you have an excess of production. If your meter measures inverted you can create a helper that inverts this value and use it instead of the energy meter.
+Be careful because when this is enabled Maximum Grid Power Day/Night are disabled and only will use the excess.
+
+This mode should be triggered by an external input boolean sensor such as switch helper.
+
 
 ### **Safety Features**
 - **Maximum/minimum amperage limits**
