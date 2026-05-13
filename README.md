@@ -17,8 +17,23 @@ It also supports **different power limits for day and night** to optimize chargi
 </div>
 
 ---
-## 🆕 **Latest Update: Version 2.1 Released!**
-### ⭐ **What's New in v2.1**
+## 🆕 **Latest Update: Version 2.2 Released!**
+### ⭐ **What's New in v2.2**
+#### **Optional Location Tracker**
+- **Car/Person Location Tracker is now optional**: Leave the field empty during configuration to disable location-based checks entirely
+- **Multi-vehicle support**: Ideal for households with more than one EV where tying regulation to a specific person/vehicle leads to incorrect behavior
+- **Shared charger friendly**: Useful when the charger may serve cars not linked to the configured tracker (guests, family vehicles, etc.)
+- **Backwards compatible**: Existing setups using the location tracker continue to work exactly as before
+
+**No action required for existing users** - the previous behavior is preserved when a tracker entity is configured.
+
+---
+
+### 📋 **Previous Updates**
+
+<details>
+<summary><b>Version 2.1 - Case-Insensitive Charging Status Support</b></summary>
+
 #### **Case-Insensitive Charging Status Support**
 - **ESPhome Tesla BLE compatibility**: Now supports "Charging" (capital C) status from ESPhome Tesla BLE client
 - **Multiple case format support**: Accepts `charging`, `Charging`, `CHARGING`, and other variations
@@ -26,10 +41,7 @@ It also supports **different power limits for day and night** to optimize chargi
 - **Better integration compatibility**: Works seamlessly with different Home Assistant integrations and custom components
 
 **No configuration changes required** - existing automations will automatically benefit from improved status detection.
-
----
-
-### 📋 **Previous Updates**
+</details>
 
 <details>
 <summary><b>Version 2.0 - Smart Start/Stop Control</b></summary>
@@ -103,7 +115,7 @@ The following parameters need to be configured:
 
 ### **Basic Settings**
 - **Charging interval** (1, 3, or 5 minutes).
-- **A device tracker** (preferably the car) to ensure that the automation runs only when the EV is at home.
+- **🆕 A device tracker (optional in v2.2)** – Preferably the car, to ensure the automation runs only when the EV is at home. **Leave empty to disable** the location check entirely (useful for shared chargers or multi-vehicle households).
 - **A charging status sensor** to ensure changes are only made when the EV is actively charging.
 - **Total power consumption sensor** (measured in watts).
 
@@ -114,9 +126,9 @@ The following parameters need to be configured:
 - **Maximum charging amperage** – The system will never exceed this limit, even if extra power is available.
 - **Minimum charging amperage** – The system will stop charging if power availability drops below this threshold.
 
-### **Charger Control (New in v2.0)**
+### **Charger Control**
 - **Charging current control entity** – The EV or charger must support dynamic amperage control.
-- **🆕 EV Charging Toggle (Start/Stop)** – A `select` entity that controls your charger's start/stop state with options like:
+- **EV Charging Toggle (Start/Stop)** – A `select` entity that controls your charger's start/stop state with options like:
   - `"Start charging"`
   - `"Stop charging"`
   - `"Waiting for command"`
@@ -129,9 +141,9 @@ The following parameters need to be configured:
 ## 🚀 How It Works
 
 The automation runs every **1, 3, or 5 minutes**, depending on the selected interval.  
-It **only** adjusts the charging rate if the EV is **charging** and **at home**.  
+It **only** adjusts the charging rate if the EV is **charging** and (if configured) **at home**.  
 
-### **Intelligent Power Management (v2.0)**
+### **Intelligent Power Management**
 1. **Monitors** total household power consumption
 2. **Calculates** available power for EV charging
 3. **Adjusts** charging current gradually (1A steps with delays)
@@ -150,7 +162,7 @@ This blueprint allows setting **different power limits for day and night**, ensu
 ### **Safety Features**
 - **Maximum/minimum amperage limits**
 - **Gradual adjustments** to prevent charger errors
-- **Only operates** when car is home and plugged in
+- **Optional location check** – when configured, only operates when car is home and plugged in
 - **Respects charger capabilities**
 
 ---
@@ -171,6 +183,7 @@ This blueprint allows setting **different power limits for day and night**, ensu
 2. **Monitor for the first few days** to ensure stable operation
 3. **Adjust time periods** to match your electricity tariff
 4. **Use shorter intervals** (1 min) for faster response to power changes
+5. **Disable the location tracker** (leave empty) if you have multiple EVs or share the charger with other vehicles
 
 ---
 
