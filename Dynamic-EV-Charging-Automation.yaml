@@ -1,28 +1,34 @@
 blueprint:
-  name: Dynamic EV Charging Automation v2.1
+  name: Dynamic EV Charging Automation v2.2
   description: >
+    **v2.2 - Optional location tracker**
+    - The Car/Person Location Tracker is now optional
+    - Leave it empty to disable location-based checks
+    - Useful for shared chargers, multi-vehicle households, or when
+      the charger may serve cars not linked to the configured tracker
+
     **v2.1 - Added case-insensitive charging status support
     - Added support for "Charging" (capital C) status from ESPhome Tesla BLE
-    - Improved status detection to support multiple case variations  
+    - Improved status detection to support multiple case variations
     **v2.0 - Added start/stop control and fixed power calculation
     - Added charger toggle control for start/stop
     - Fixed power calculation formula
     - Added gradual adjustment to prevent charger errors
     - Improved oscillation prevention
-    
-    This automation dynamically adjusts the charging current of an electric vehicle (EV) based on the total power consumption in the household. 
 
-    It ensures that the EV charger does not exceed the available power, preventing overloads and optimizing energy usage. The system continuously monitors home power consumption and regulates the charging rate accordingly. 
+    This automation dynamically adjusts the charging current of an electric vehicle (EV) based on the total power consumption in the household.
 
-    You can configure two different charging periods (Day and Night) if your electricity contract has varying power limits at different times. 
-  
-    Depending on what you have exposed in Home Assistant you could target your car or your charger. Works with any EV charger that supports amperage control via Home Assistant. 
+    It ensures that the EV charger does not exceed the available power, preventing overloads and optimizing energy usage. The system continuously monitors home power consumption and regulates the charging rate accordingly.
+
+    You can configure two different charging periods (Day and Night) if your electricity contract has varying power limits at different times.
+
+    Depending on what you have exposed in Home Assistant you could target your car or your charger. Works with any EV charger that supports amperage control via Home Assistant.
   domain: automation
   input:
     interval:
       name: Adjustment Interval (minutes)
       description: >
-        Interval in minutes to adjust the charging amperage dynamically. 
+        Interval in minutes to adjust the charging amperage dynamically.
 
         The automation will check the total household power consumption at this interval and adjust the EV charging current accordingly. A shorter interval (e.g., 1 minute) allows faster reactions to power fluctuations, while a longer interval (e.g., 5 minutes) reduces the number of adjustments but may respond more slowly to changes in home energy use.
 
@@ -36,49 +42,52 @@ blueprint:
             - label: "3 minutes"
               value: /3
             - label: "5 minutes"
-              value: /5  
+              value: /5
     device_tracker:
-      name: Car/person Location Tracker
+      name: Car/Person Location Tracker (Optional)
       description: >
-        Entity that determines whether the electric vehicle (EV) is at home. 
+        Optional entity that determines whether the electric vehicle (EV) is at home.
 
-        This can be a device tracker linked to the EV, a person’s location, or any other entity that provides location-based information. 
+        Leave this field empty to disable the location check entirely. This is useful when:
+        - Your charger may serve cars not linked to the configured tracker (guests, family vehicles, etc.)
+        - You own more than one car and don't want to tie regulation to a specific person/vehicle
+        - You want the automation to regulate based purely on the charging sensor state
 
-        The automation will only adjust the charging current when the EV is detected at home, preventing unwanted changes when charging away from the configured location.
-      default: device_tracker.ubicacion
+        When set, the automation will only adjust the charging current if the tracked entity is at "home".
+      default: ""
       selector:
         entity:
           domain: device_tracker
     sensor_charging:
       name: EV Charging Sensor
       description: >
-        Sensor that detects whether the electric vehicle (EV) is currently charging. 
+        Sensor that detects whether the electric vehicle (EV) is currently charging.
 
-        The automation will only adjust the charging amperage if this sensor indicates that the EV is actively charging. 
+        The automation will only adjust the charging amperage if this sensor indicates that the EV is actively charging.
 
         If the vehicle is at home but not plugged in or has already completed charging, no changes will be made to the charging current.
       default: sensor.ev_charger_estado
       selector:
         entity:
-          domain: sensor          
+          domain: sensor
     charger_toggle:
       name: EV Charging Toggle (Start/Stop)
       description: >
         Select entity that controls the charging state of the EV charger.
-        
+
         This entity should support options like "Start charging", "Stop charging", or similar commands.
-        
+
         When the calculated amperage falls below the minimum threshold, the automation will use this entity to stop charging instead of setting amperage to 0.
-        
+
         When power becomes available again, it will restart charging and set the appropriate amperage.
       default: select.ev_charger_toggle_charging
       selector:
         entity:
-          domain: select               
+          domain: select
     sensor_house_power:
       name: Total Power Consumption Sensor
-      description: Sensor that measures the total power consumption of the household in real-time.  This value is used to determine the available power for charging the electric vehicle (EV), ensuring that the charging current is dynamically adjusted to prevent exceeding the contracted power limit.  
-      default: sensor.shellyemg3_8cbfea96acd8_em1_power      
+      description: Sensor that measures the total power consumption of the household in real-time.  This value is used to determine the available power for charging the electric vehicle (EV), ensuring that the charging current is dynamically adjusted to prevent exceeding the contracted power limit.
+      default: sensor.shellyemg3_8cbfea96acd8_em1_power
       selector:
         entity:
           domain: sensor
@@ -100,7 +109,7 @@ blueprint:
         number:
           min: 0
           max: 15000
-          step: 100          
+          step: 100
     charging_current:
       name: Charging Current Control
       description: Entity that controls the charging amperage of the electric vehicle (EV). This must be a `number` entity that allows adjusting the charging current dynamically. The automation will modify this value based on the available power in the household, ensuring efficient energy use and preventing overloads.
@@ -125,7 +134,7 @@ blueprint:
         number:
           min: 6
           max: 32
-          step: 1  
+          step: 1
     min_amps:
       name: Minimum amps
       description:   Select the minimum charging current (in amps) that the electric vehicle (EV) should use. If the calculated charging amperage falls below this value due to limited available power, the automation will stop charging until more power is available. This helps prevent inefficient low-power charging and ensures the EV charges only when there is sufficient energy available.
@@ -134,10 +143,10 @@ blueprint:
         number:
           min: 6
           max: 32
-          step: 1                       
+          step: 1
     day_time_days:
       name: Day Time Active Days
-      description: Select the days of the week when the 'day_time' mode should be active. During these selected days, the automation will apply the maximum contracted power for daytime charging. If your electricity provider offers different power limits on specific days, you can configure this accordingly to optimize charging.  
+      description: Select the days of the week when the 'day_time' mode should be active. During these selected days, the automation will apply the maximum contracted power for daytime charging. If your electricity provider offers different power limits on specific days, you can configure this accordingly to optimize charging.
       default:
         - mon
         - tue
@@ -185,26 +194,33 @@ triggers:
   - trigger: time_pattern
     minutes: !input interval
 
+variables:
+  device_tracker_input: !input device_tracker
+
 condition:
   - condition: and
     conditions:
-      - condition: state
-        entity_id: !input device_tracker
-        state: home
+      - condition: or
+        conditions:
+          - condition: template
+            value_template: "{{ device_tracker_input in [none, '', 'none'] }}"
+          - condition: state
+            entity_id: !input device_tracker
+            state: home
       - condition: state
         entity_id: !input sensor_charging
-        state: 
+        state:
           - 'charging'
           - 'charged'
           - 'plugged_in'
           - 'Charging'
-          - 'CHARGING'          
-        
+          - 'CHARGING'
+
 action:
   - variables:
       voltage: !input voltage
       max_amps: !input max_amps
-      min_amps: !input min_amps       
+      min_amps: !input min_amps
       sensor_house_power_entity: !input sensor_house_power
       charging_current_entity: !input charging_current
       sensor_charging_entity: !input sensor_charging
@@ -212,72 +228,4 @@ action:
       grid_power: "{{ states(sensor_house_power_entity) | float(0) }}"
       total_consumption: "{{ states(sensor_house_power_entity) | float(0) }}"
       charger_consumption: |-
-        {% set state = states(sensor_charging_entity) | lower %}
-        {% if state in ['charging', 'plugged_in', 'waiting_for_authorization', 'waiting'] %}
-          {{ charging_current_value * voltage }}
-        {% else %}
-          0
-        {% endif %}
-      max_grid_power_day: !input max_grid_power_day
-      max_grid_power_night: !input max_grid_power_night      
-      day_time_days: !input day_time_days
-      day_time_start: !input day_time_start
-      day_time_end: !input day_time_end
-      current_day: "{{ ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'][now().weekday()] }}"
-      is_day_time: "{{ current_day in day_time_days and day_time_start <= now().hour < day_time_end }}"  
-      actual_free_power: |-
-        {% if is_day_time %}
-          {{ [0, max_grid_power_day - total_consumption + charger_consumption] | max }}
-        {% else %}
-          {{ [0, max_grid_power_night - total_consumption + charger_consumption] | max }}
-        {% endif %}        
-# Compute new_target_value once before starting the adjustment loop
-      new_target_value: >-
-        {% set raw_amps = (actual_free_power / voltage) | float %}
-        {% if raw_amps > max_amps %}
-          {{ max_amps | float }}
-        {% elif raw_amps < min_amps %}
-          0.0
-        {% else %}
-          {{ raw_amps | int }}
-        {% endif %}
-# First: Control charging state (Start/Stop)
-  - service: select.select_option
-    target:
-      entity_id: !input charger_toggle
-    data:
-      option: |-
-        {% if actual_free_power / voltage >= min_amps %}
-          Start charging
-        {% else %}
-          Stop charging
-        {% endif %}    
-        
-
-
-  - repeat:
-      while:
-# While the difference between the current charging value and new_target_value is >= 1 A,
-# continue adjusting the current in steps of 1 amp
-        - condition: template
-          value_template: >-
-            {% set current_amps = states(charging_current_entity) | float %}
-            {% set diff = (current_amps - (new_target_value | float)) | abs %}
-            {{ diff >= 1 }}
-      sequence:
-        - service: number.set_value
-          target:
-            entity_id: !input charging_current
-          data:
-            value: >-
-              {% set current_amps = states(charging_current_entity) | float %}
-              {% if current_amps < (new_target_value | float) %}
-                {{ current_amps + 1 }}
-              {% elif current_amps > (new_target_value | float) %}
-                {{ [current_amps - 1, min_amps] | max }}
-              {% else %}
-                {{ new_target_value }}
-              {% endif %}
-        - delay:
-            seconds: 5
-mode: restart            
+        {% set state = states(sensor_charging_entity) | l
